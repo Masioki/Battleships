@@ -1,6 +1,6 @@
 package battleships.domain;
 
-import battleships.domain.Game.Game;
+import battleships.domain.Game.BattleshipGame;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,8 +29,8 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user")
     private Stats stats;
 
-    @OneToMany //TODO: one to many one sided
-    private List<Game> games;
+    @OneToMany
+    private List<BattleshipGame> battleshipGames;
 
 
     @Override

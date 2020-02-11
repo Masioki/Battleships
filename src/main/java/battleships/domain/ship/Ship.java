@@ -1,5 +1,6 @@
-package battleships.domain.Game;
+package battleships.domain.ship;
 
+import battleships.domain.Game.BattleshipGame;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,10 +22,13 @@ public class Ship {
     private int shipID;
 
     @ManyToOne
-    private Game game;
+    private BattleshipGame battleshipGame;
 
     @NotEmpty
     private String username;
+
+    @NotEmpty
+    private ShipOrientation orientation;
 
     @Min(1)
     @Max(5)
@@ -38,20 +42,28 @@ public class Ship {
         parts = new ArrayList<>();
     }
 
-    public Ship(int size, String username) throws Exception {
+    public Ship(ShipOrientation orientation, int size, String username) throws Exception {
         if (size < 1 || size > 5) throw new Exception("Ship is too big");
         this.size = size;
         this.username = username;
+        this.orientation = orientation;
         parts = new ArrayList<>();
     }
 
 
+    public boolean contains(int x, int y) {
+        return parts.stream().anyMatch(part -> part.getX() == x && part.getY() == y);
+    }
+
     public boolean destroy(int x, int y) {
         AtomicBoolean result = new AtomicBoolean(false);
-        parts.stream().filter(part -> part.getX() == x && part.getY() == y).findFirst().ifPresent(part -> {
-            part.setDestroyed(true);
-            result.set(true);
-        });
+        parts.stream()
+                .filter(part -> part.getX() == x && part.getY() == y && !part.isDestroyed())
+                .findFirst()
+                .ifPresent(part -> {
+                    part.setDestroyed(true);
+                    result.set(true);
+                });
         return result.get();
     }
 

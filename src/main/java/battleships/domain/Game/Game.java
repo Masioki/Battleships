@@ -1,51 +1,22 @@
 package battleships.domain.Game;
 
 import battleships.domain.User;
-import lombok.Getter;
-import lombok.Setter;
+import battleships.domain.ship.Ship;
+import battleships.domain.ship.WrongShipSetException;
 
-import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Getter
-@Setter
-public class Game {
+public interface Game {
+    void start() throws WrongShipSetException, IncorrectPlayersException;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int gameID;
+    boolean addShipSet(List<Ship> ships);
 
-    @Enumerated(value = EnumType.STRING)
-    private GameStatus gameStatus;
+    GameStatus getGameStatus();
 
-    @OneToMany(mappedBy = "game")
-    private List<Ship> ships;
+    String getWinnerUsername();
 
+    boolean attack(String username, int x, int y);
 
-    private boolean containsUser(User user) {
-        for (Ship s : ships) {
-            if (s.getUsername().equals(user.getUsername())) return true;
-        }
-        return false;
-    }
+    boolean isOpponentShipDestroyed(String username, int x, int y);
 
-    public int howManyUsers(User user) {
-        List<String> present = new ArrayList<>();
-        int result = 0;
-        for (Ship s : ships) {
-            if (!present.contains(s.getUsername())) {
-                result++;
-                present.add(s.getUsername());
-            }
-        }
-        return result;
-    }
-
-    public boolean addShip(Ship ship) {
-
-        return false;//TODO
-    }
-    //TODO: check if users ships are ok
 }

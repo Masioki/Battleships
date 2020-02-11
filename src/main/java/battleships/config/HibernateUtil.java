@@ -1,10 +1,10 @@
 package battleships.config;
 
-import battleships.domain.Game.Game;
-import battleships.domain.Game.Ship;
-import battleships.domain.Game.ShipPart;
+import battleships.domain.Game.BattleshipGame;
 import battleships.domain.Stats;
 import battleships.domain.User;
+import battleships.domain.ship.Ship;
+import battleships.domain.ship.ShipPart;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
@@ -33,9 +33,10 @@ public class HibernateUtil {
 
                 configuration.addAnnotatedClass(User.class);
                 configuration.addAnnotatedClass(Stats.class);
-                configuration.addAnnotatedClass(Game.class);
                 configuration.addAnnotatedClass(Ship.class);
                 configuration.addAnnotatedClass(ShipPart.class);
+                configuration.addAnnotatedClass(BattleshipGame.class);
+
 
 
                 ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()

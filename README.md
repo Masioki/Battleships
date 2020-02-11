@@ -1,2 +1,2 @@
 # Battleships
-Web battleship game 
+Web battleship battleshipGame 

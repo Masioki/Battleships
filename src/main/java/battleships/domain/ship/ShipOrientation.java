@@ -1,4 +1,4 @@
-package battleships.domain.Game;
+package battleships.domain.ship;
 
 public enum ShipOrientation {
     VERTICAL,

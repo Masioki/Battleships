@@ -12,7 +12,7 @@
     <artifactId>battleships</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>battleships</name>
-    <description>Two-player game</description>
+    <description>Two-player battleshipGame</description>
 
     <properties>
         <java.version>13</java.version>
