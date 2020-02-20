@@ -1,2 +1,2 @@
 # Battleships
-Web battleship battleshipGame 
+Web battleship battleshipGameImpl 

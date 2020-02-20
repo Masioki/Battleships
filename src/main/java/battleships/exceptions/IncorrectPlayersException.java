@@ -1,4 +1,4 @@
-package battleships.domain.Game;
+package battleships.exceptions;
 
 public class IncorrectPlayersException extends Exception {
 

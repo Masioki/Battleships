@@ -1,4 +1,4 @@
-package battleships.domain.ship;
+package battleships.exceptions;
 
 public class WrongShipSetException extends Exception {
 

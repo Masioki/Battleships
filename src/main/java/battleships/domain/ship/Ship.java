@@ -1,8 +1,10 @@
 package battleships.domain.ship;
 
-import battleships.domain.Game.BattleshipGame;
+import battleships.domain.Game.BattleshipGameImpl;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
@@ -22,7 +24,8 @@ public class Ship {
     private int shipID;
 
     @ManyToOne
-    private BattleshipGame battleshipGame;
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private BattleshipGameImpl battleshipGameImpl;
 
     @NotEmpty
     private String username;
@@ -34,7 +37,7 @@ public class Ship {
     @Max(5)
     private int size;
 
-    @OneToMany(mappedBy = "ship")
+    @OneToMany(mappedBy = "ship", fetch = FetchType.EAGER)
     private List<ShipPart> parts;
 
 
@@ -42,12 +45,31 @@ public class Ship {
         parts = new ArrayList<>();
     }
 
-    public Ship(ShipOrientation orientation, int size, String username) throws Exception {
+
+    public static Ship getShipWithoutParts(String username, int size, ShipOrientation orientation) throws Exception {
         if (size < 1 || size > 5) throw new Exception("Ship is too big");
-        this.size = size;
-        this.username = username;
-        this.orientation = orientation;
-        parts = new ArrayList<>();
+        Ship s = new Ship();
+        s.setSize(size);
+        s.setUsername(username);
+        s.setOrientation(orientation);
+        return s;
+    }
+
+    public static Ship getShipWithParts(String username, int size, ShipOrientation orientation, int x, int y) throws Exception {
+        Ship s = getShipWithoutParts(username, size, orientation);
+
+        switch (orientation) {
+            case VERTICAL -> {
+                for (int i = y; i < y + size; i++)
+                    if (!s.addPart(new ShipPart(x, i, s))) throw new Exception("Wrong data");
+            }
+            case HORIZONTAL -> {
+                for (int i = x; i < x + size; i++)
+                    if (!s.addPart(new ShipPart(i, y, s))) throw new Exception("Wrong data");
+            }
+
+        }
+        return s;
     }
 
 
@@ -68,8 +90,9 @@ public class Ship {
     }
 
     public boolean addPart(ShipPart part) {
+        if (parts == null) parts = new ArrayList<>();
         if (!parts.contains(part) && parts.size() < size) {
-            parts.add(part);
+            parts.add(part); //TODO: is part in range?
             return true;
         }
         return false;

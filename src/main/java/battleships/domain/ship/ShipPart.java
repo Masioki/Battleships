@@ -41,12 +41,13 @@ public class ShipPart {
         destroyed = false;
     }
 
-
-    public ShipPart(int x, int y) {
+    public ShipPart(int x, int y, Ship ship) {
         this.x = x;
         this.y = y;
+        this.ship = ship;
         destroyed = false;
     }
+
 
     @Override
     public boolean equals(Object o) {

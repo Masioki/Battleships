@@ -1,72 +1,28 @@
 package battleships.domain.Game;
 
 import battleships.domain.ship.Ship;
-import lombok.Getter;
-import lombok.Setter;
+import battleships.dto.MoveDTO;
+import battleships.exceptions.IncorrectPlayersException;
+import battleships.exceptions.ShipDestroyedException;
+import battleships.exceptions.WrongMoveException;
+import battleships.exceptions.WrongShipSetException;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Getter
-@Setter
-public class BattleshipGame {
+public interface BattleshipGame {
+    void start() throws WrongShipSetException, IncorrectPlayersException;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int gameID;
+    boolean addShipSet(List<Ship> ships);
 
-    @Enumerated(value = EnumType.STRING)
-    private GameStatus gameStatus;
+    GameStatus getGameStatus();
 
-    @OneToMany(mappedBy = "battleshipGame")
-    private List<Ship> ships;
+    String getWinnerUsername();
 
-    @NotEmpty
-    private String turn;
+    String getOpponentUsername(String username);
 
+    Move attack(MoveDTO moveDTO) throws WrongMoveException, ShipDestroyedException;
 
-    public BattleshipGame() {
-        ships = new ArrayList<>();
-        gameStatus = GameStatus.WAITING;
-    }
+    Board getBoard(String username);
 
-    public BattleshipGame(String creatorUsername) {
-        turn = creatorUsername;
-        ships = new ArrayList<>();
-        gameStatus = GameStatus.WAITING;
-    }
-
-
-    private void changeTurn() {
-        for (Ship s : ships) {
-            if (!s.getUsername().equals(turn)) turn = s.getUsername();
-        }
-    }
-
-
-    //TODO: change game status
-    public boolean attack(String username, int x, int y) {
-        for (Ship s : ships) {
-            if (s.getUsername().equals(username) && s.contains(x, y)) {
-                boolean result = s.destroy(x, y);
-                if (result) changeTurn();
-                return result;
-            }
-        }
-        return false;
-    }
-
-    public boolean isOpponentShipDestroyed(String username, int x, int y) {
-        for (Ship s : ships) {
-            if (!s.getUsername().equals(username) && s.contains(x, y)) return s.isDestroyed();
-        }
-        return true;
-    }
-
-    public void addShip(Ship ship) {
-        ships.add(ship);
-    }
+    void surrender(String username);
 }

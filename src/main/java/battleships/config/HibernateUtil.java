@@ -1,6 +1,7 @@
 package battleships.config;
 
-import battleships.domain.Game.BattleshipGame;
+import battleships.domain.Game.BattleshipGameImpl;
+import battleships.domain.Game.Move;
 import battleships.domain.Stats;
 import battleships.domain.User;
 import battleships.domain.ship.Ship;
@@ -31,12 +32,13 @@ public class HibernateUtil {
                 properties.put(Environment.HBM2DDL_AUTO, "create-drop");
                 configuration.setProperties(properties);
 
-                configuration.addAnnotatedClass(User.class);
-                configuration.addAnnotatedClass(Stats.class);
+
+                configuration.addAnnotatedClass(Move.class);
                 configuration.addAnnotatedClass(Ship.class);
                 configuration.addAnnotatedClass(ShipPart.class);
-                configuration.addAnnotatedClass(BattleshipGame.class);
-
+                configuration.addAnnotatedClass(BattleshipGameImpl.class);
+                configuration.addAnnotatedClass(User.class);
+                configuration.addAnnotatedClass(Stats.class);
 
 
                 ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
