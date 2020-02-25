@@ -1,4 +1,4 @@
-package battleships.domain;
+package battleships.domain.user;
 
 public enum UserRole {
     GUEST(3),

@@ -33,7 +33,10 @@ public class Move {
     private boolean success;
 
     @ManyToOne
-    private BattleshipGameImpl game;
+    private BattleshipGame game;
+
+    @Enumerated(value = EnumType.ORDINAL)
+    private MoveType moveType;
 
 
     public MoveDTO getDTO() {
@@ -41,6 +44,7 @@ public class Move {
         result.setX(x);
         result.setY(y);
         result.setUsername(username);
+        result.setType(moveType);
         return result;
     }
 }

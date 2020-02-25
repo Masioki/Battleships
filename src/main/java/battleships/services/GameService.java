@@ -1,79 +1,114 @@
 package battleships.services;
 
 import battleships.domain.Game.BattleshipGame;
-import battleships.domain.Game.BattleshipGameImpl;
 import battleships.domain.Game.GameStatus;
 import battleships.domain.Game.Move;
-import battleships.domain.User;
+import battleships.domain.ship.Ship;
+import battleships.domain.user.AbstractUser;
 import battleships.dto.MoveDTO;
+import battleships.dto.ShipDTO;
 import battleships.exceptions.GameFinishedException;
 import battleships.exceptions.ShipDestroyedException;
 import battleships.exceptions.WrongMoveException;
-import battleships.repositories.UniversalRepository;
+import battleships.exceptions.WrongShipSetException;
+import battleships.repositories.GameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 //TODO: ADD ASYNC
 
 @Service
 public class GameService {
 
+
     @Autowired
-    private UniversalRepository repository;
+    private GameRepository repository;
 
     @Autowired
     private UserService userService;
 
     @Autowired
-    private SimpMessagingTemplate messaging;
+    private ActiveGamesAndUsersRegistry registry;
 
 
-    public BattleshipGame getGame(int gameID) {
-        return repository.getBattleshipGame(gameID);
-    }
-
-    public BattleshipGame createGame(String ownerUsername) {
-        return new BattleshipGameImpl(ownerUsername);
-    }
-
-    public Move move(MoveDTO move, int gameID) throws WrongMoveException, ShipDestroyedException, GameFinishedException {
+    public Move move(AbstractUser user, MoveDTO move, int gameID)
+            throws WrongMoveException, ShipDestroyedException, GameFinishedException {
         BattleshipGame game = getGame(gameID);
+        move.setUsername(user.getName());
         Move result = null;
         if (game != null && game.getGameStatus() == GameStatus.IN_PROGRESS) {
-            result = game.attack(move);
-            if (game.getGameStatus() == GameStatus.FINISHED) throw new GameFinishedException(game.getWinnerUsername());
+            try {
+                result = game.attack(move);
+            } catch (GameFinishedException gfe) {
+                String winner = game.getWinnerUsername();
+                String loser = game.getOpponentUsername(winner);
+                if (loser != null) userService.updatePoints(winner, loser);
+                removeGame(gameID);
+                throw gfe;
+            }
         }
         return result;
     }
 
-    public void guestSurrenderAndSend(String username, String destination) {
-        if (destination != null) {
-            if (destination.startsWith("/game/")) {
-                int gameID = Integer.parseInt(destination.substring(6));
-                surrender(username, gameID);
-                messaging.convertAndSend(destination, new MoveDTO(MoveDTO.MoveType.SURRENDER));
-            }
-            messaging.convertAndSend(destination, new MoveDTO(MoveDTO.MoveType.OPPONENT_DISCONNECT));
-        }
-    }
-
-    public void surrender(String username, int gameID) {
+    public Move surrender(AbstractUser user, int gameID) throws WrongMoveException {
         BattleshipGame game = getGame(gameID);
-        if (game != null) {
-            game.surrender(username);
-            User winner = userService.getUser(game.getWinnerUsername());
-            User loser = userService.getUser(username);
-            if (winner != null && loser != null) {
-                winner.getStats().updatePoints(true, loser.getStats().getPoints());
-                loser.getStats().updatePoints(false, winner.getStats().getPoints());
-            }
-            repository.remove(game);
+        Move m = null;
+        if (game != null && game.getGameStatus() == GameStatus.IN_PROGRESS) {
+            m = game.surrender(user.getName());
+            String opponent = game.getOpponentUsername(user.getName());
+            userService.updatePoints(opponent, user.getName());
+            removeGame(gameID);
         }
+        return m;
     }
 
     public void removeGame(int gameID) {
         BattleshipGame game = getGame(gameID);
-        if (game != null) repository.remove(game);
+        if (game != null) repository.removeBattleshipGame(game);
+        registry.removeGame(gameID);
+    }
+
+    public BattleshipGame getGame(int gameID) {
+        BattleshipGame game = registry.getGame(gameID);
+        if (game == null) game = repository.getBattleshipGame(gameID);
+        return game;
+    }
+
+    public int saveGame(BattleshipGame game) {
+        try {
+            return repository.saveBattleshipGame(game);
+        } catch (Exception e) {
+            return -1; //TODO
+        }
+    }
+
+    public int createGame(String ownerUsername, List<ShipDTO> shipsDTO) throws Exception {
+        BattleshipGame game = new BattleshipGame(ownerUsername);
+        if (!registry.containsUser(ownerUsername)) throw new IllegalAccessException();
+        shipsDTO.forEach(shipDTO -> shipDTO.setUsername(ownerUsername));
+        List<Ship> ships = shipsDTO.stream()
+                .map(Ship::getShipFromDTO)
+                .collect(Collectors.toList());
+        ships.forEach(ship -> ship.setBattleshipGame(game));
+        if (!game.joinGame(ships)) throw new WrongShipSetException(ownerUsername);
+        int id = saveGame(game);
+        registry.addGame(game);
+        return id;
+    }
+
+    public boolean joinGame(AbstractUser user, int gameID, List<ShipDTO> shipsDTO) throws Exception {
+        BattleshipGame game = registry.getGame(gameID);
+        if (game == null) return false;
+        shipsDTO.forEach(shipDTO -> shipDTO.setUsername(user.getName()));
+        List<Ship> ships = shipsDTO.stream()
+                .map(Ship::getShipFromDTO)
+                .collect(Collectors.toList());
+        ships.forEach(ship -> ship.setBattleshipGame(game));
+        boolean result = game.joinGame(ships);
+        if (result && !user.isAutoGenerated()) repository.saveBattleshipGame(game);
+        return result;
     }
 }

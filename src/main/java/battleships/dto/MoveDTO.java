@@ -1,5 +1,6 @@
 package battleships.dto;
 
+import battleships.domain.Game.MoveType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,11 +14,6 @@ public class MoveDTO {
     private String username;
     private MoveType type;
 
-    public enum MoveType {
-        MOVE,
-        SURRENDER,
-        OPPONENT_DISCONNECT
-    }
 
     public MoveDTO() {
         type = MoveType.MOVE;

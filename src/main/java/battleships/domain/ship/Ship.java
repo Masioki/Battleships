@@ -1,6 +1,7 @@
 package battleships.domain.ship;
 
-import battleships.domain.Game.BattleshipGameImpl;
+import battleships.domain.Game.BattleshipGame;
+import battleships.dto.ShipDTO;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
@@ -25,7 +26,7 @@ public class Ship {
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private BattleshipGameImpl battleshipGameImpl;
+    private BattleshipGame battleshipGame;
 
     @NotEmpty
     private String username;
@@ -46,8 +47,8 @@ public class Ship {
     }
 
 
-    public static Ship getShipWithoutParts(String username, int size, ShipOrientation orientation) throws Exception {
-        if (size < 1 || size > 5) throw new Exception("Ship is too big");
+    public static Ship getShipWithoutParts(String username, int size, ShipOrientation orientation) {
+        if (size < 1 || size > 5) return null;
         Ship s = new Ship();
         s.setSize(size);
         s.setUsername(username);
@@ -55,17 +56,25 @@ public class Ship {
         return s;
     }
 
-    public static Ship getShipWithParts(String username, int size, ShipOrientation orientation, int x, int y) throws Exception {
+    public static Ship getShipFromDTO(ShipDTO dto) {
+        String username = dto.getUsername();
+        int size = dto.getSize();
+        ShipOrientation orientation = dto.getShipOrientation();
+        int x = dto.getX();
+        int y = dto.getY();
+
         Ship s = getShipWithoutParts(username, size, orientation);
+
+        if (s == null) return null;
 
         switch (orientation) {
             case VERTICAL -> {
                 for (int i = y; i < y + size; i++)
-                    if (!s.addPart(new ShipPart(x, i, s))) throw new Exception("Wrong data");
+                    if (!s.addPart(new ShipPart(x, i, s))) return null;
             }
             case HORIZONTAL -> {
                 for (int i = x; i < x + size; i++)
-                    if (!s.addPart(new ShipPart(i, y, s))) throw new Exception("Wrong data");
+                    if (!s.addPart(new ShipPart(i, y, s))) return null;
             }
 
         }
@@ -104,5 +113,6 @@ public class Ship {
         }
         return true;
     }
+
 
 }

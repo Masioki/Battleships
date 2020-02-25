@@ -8,28 +8,27 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 @Configuration
 @EnableWebMvc
 public class AppConfig implements WebMvcConfigurer {
-
-    @Bean
-    public InternalResourceViewResolver viewResolver() {
-        InternalResourceViewResolver vr = new InternalResourceViewResolver();
-        vr.setPrefix("/WEB-INF/jsp/");
-        vr.setSuffix(".jsp");
-        return vr;
-    }
+    /*
+        @Bean
+        public InternalResourceViewResolver viewResolver() {
+            InternalResourceViewResolver vr = new InternalResourceViewResolver();
+            vr.setPrefix("/WEB-INF/jsp/");
+            vr.setSuffix(".jsp");
+            return vr;
+        }
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         assert registry != null;
         registry.addViewController("/login").setViewName("login");
-        registry.addViewController("/register").setViewName("register");
+        registry.addViewController("/register").setViewName("activeGamesAndUsersRegistry");
     }
+*/
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

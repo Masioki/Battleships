@@ -1,4 +1,4 @@
-package battleships.domain;
+package battleships.domain.user;
 
 
 import lombok.Getter;
@@ -16,7 +16,7 @@ public class Stats {
     private int statsID;
 
     @OneToOne
-    private User user;
+    private RegisteredUser user;
 
     @Min(0)
     private int gamesWon;

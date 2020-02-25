@@ -1,16 +1,24 @@
 package battleships.exceptions;
 
-public class ShipDestroyedException extends Exception {
-    private final int x;
-    private final int y;
+import battleships.domain.Game.Move;
+import battleships.domain.Game.MoveType;
+import lombok.Getter;
 
-    public ShipDestroyedException(int x, int y) {
-        this.x = x;
-        this.y = y;
+@Getter
+public class ShipDestroyedException extends Exception {
+
+    private final Move move;
+
+    public ShipDestroyedException(Move move) {
+        this.move = move;
     }
 
-    @Override
-    public String getMessage() {
-        return "Ship was destroyed during move: x=" + x + " y=" + y;
+    public ShipDestroyedException(int x, int y, String username) {
+        move = new Move();
+        move.setX(x);
+        move.setY(y);
+        move.setMoveType(MoveType.MOVE);
+        move.setSuccess(true);
+        move.setUsername(username);
     }
 }

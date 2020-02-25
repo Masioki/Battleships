@@ -20,12 +20,18 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         config.enableSimpleBroker("/topic");
     }
 
-
+    /*
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        assert registration != null;
+        registration.setInterceptors(new WebsocketEventsController());
+    }
+*/
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         assert registry != null;
         registry.addEndpoint("/stomp")
-                .setHandshakeHandler(new CustomHandshakeHandler())
+                //.setHandshakeHandler(new CustomHandshakeHandler())
                 .withSockJS();
     }
 
