@@ -1,4 +1,4 @@
-package battleships.config;
+package battleships.config.authentication;
 
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 
