@@ -11,8 +11,11 @@ import battleships.services.GameService;
 import battleships.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
@@ -55,7 +58,7 @@ public class WebsocketEventsController {
                     registry.removeGame(gameID);
                     Message message = new Message();
                     message.setText(user.getName());
-                    message.setMessageType(Message.MessageType.OPPONENT_DISCONNECT);
+                    message.setType(Message.MessageType.OPPONENT_DISCONNECTED);
                     messaging.convertAndSend("/topic/game/" + gameID, message);
                 } else { //if one of players is guest end game, update stats and remove game from registry and db
                     try {
@@ -105,6 +108,8 @@ public class WebsocketEventsController {
          */
     }
 
+    //Subscription is already validated in InboundChannel
+    /*
     @EventListener
     public void handleSubscribe(SessionSubscribeEvent event) {
 
@@ -118,6 +123,6 @@ public class WebsocketEventsController {
             //TODO: force unsubscribe
         }
 
-    }
+    }*/
 
 }
